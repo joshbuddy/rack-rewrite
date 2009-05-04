@@ -8,16 +8,23 @@ Rack middleware for request rewriting.
     
     on :method => 'get' do
       
+      # When it sees /api or /test, it calls whatever is in the act block
+      #
       on :uri => %r{/(api|test)} do
         act { puts "hey way to go!" }
         pass
       end
   
+      # When it sees /google, it makes a redirect to google with the value of the query string as the search
+      #
       on :uri => %r{/google.*} do
         redirect { "http://google.com/search?q=#{CGI.escape(query_string)}" }
       end
   
-      on :uri => %r{/valid_place.*} do
+      # If a URI starts with /valid_place, it strips it off and keeps on truckin'
+      #
+      on :uri => %r{/valid_place/.*} do
+        set(:uri) { uri[%r{/valid_place(/.*)}, 1] }
         pass
       end
       

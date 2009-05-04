@@ -22,7 +22,7 @@ module Rack
       
       def update_uri_qs
         @env['REQUEST_PATH'] = uri
-        @env['REQUEST_URI'] = query_string.empty? ? uri : (uri + '?' + query_string)
+        @env['REQUEST_URI'] = query_string.empty? ? uri : "#{uri}?#{query_string}"
       end
       
       def method
