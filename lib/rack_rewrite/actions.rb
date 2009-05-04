@@ -1,64 +1,19 @@
+require 'rack'
+
 module Rack
   class Rewrite
     class Action
       
-      def uri
-        @env['PATH_INFO']
-      end
-      
-      def uri=(uri)
-        @env['PATH_INFO'] = uri
-        update_uri_qs
-      end
-      
-      def query_string
-        @env['QUERY_STRING']
-      end
-
-      def query_string=(query_string)
-        @env['QUERY_STRING'] = query_string
-        update_uri_qs
-      end
-      
-      def update_uri_qs
-        @env['REQUEST_PATH'] = uri
-        @env['REQUEST_URI'] = query_string.empty? ? uri : "#{uri}?#{query_string}"
-      end
-      
-      def method
-        @env['REQUEST_METHOD']
-      end
-      
-      def method=(method)
-        @env['REQUEST_METHOD'] = method.to_s.upcase
-      end
-      
-      def host
-        @env['HTTP_HOST']
-      end
-      
-      def host=(host)
-        @env['HTTP_HOST'] = host
-      end
-      
-      def port
-        @env['SERVER_PORT']
-      end
-      
-      def port=(port)
-        @env['SERVER_PORT'] = port.to_s
-      end
-      
-      def scheme
-        @env['rack.url_scheme']
-      end
-      
-      def scheme=(scheme)
-        @env['rack.url_scheme'] = scheme
-      end
-      
       def setup(env)
-        @env = env
+        @request = Rack::Request.new(env)
+      end
+      
+      def respond_to?(method)
+        @request.respond_to?(method) || super
+      end
+      
+      def method_missing(method, *args, &block)
+        @request.send(method, *args, &block)
       end
 
       class Pass < Action
@@ -98,11 +53,15 @@ module Rack
           @caller = caller
           @action = action
         end
-
+        
         def method_missing(method, *args, &block)
-          @caller.send(method, *args, &block)
+          if respond_to?(method)
+            super
+          else
+            @caller.send(method, *args, &block)
+          end
         end
-
+        
         def call(env)
           setup(env)
           case @action

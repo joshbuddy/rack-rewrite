@@ -12,11 +12,11 @@ describe "Rack::Rewrite Conditions" do
     end
   end
   
-  it "should detect a simple uri" do
+  it "should detect a simple path_info" do
     env = Rack::MockRequest.env_for('/test', :method => 'get')
     app = mock('app')
     app.should_receive(:call).with(env).and_return([200, {}, ["body"]])
-    Rack::Rewrite.new(app) { on(:uri => '/test') { pass } }.call(env)
+    Rack::Rewrite.new(app) { on(:path_info => '/test') { pass } }.call(env)
   end
 
 end

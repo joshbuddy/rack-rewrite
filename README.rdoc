@@ -10,27 +10,27 @@ Rack middleware for request rewriting.
       
       # When it sees /api or /test, it calls whatever is in the act block
       #
-      on :uri => %r{/(api|test)} do
+      on :path_info => %r{/(api|test)} do
         act { puts "hey way to go!" }
         pass
       end
   
       # When it sees /google, it makes a redirect to google with the value of the query string as the search
       #
-      on :uri => %r{/google.*} do
+      on :path_info => %r{/google.*} do
         redirect { "http://google.com/search?q=#{CGI.escape(query_string)}" }
       end
   
-      # If a URI starts with /valid_place, it strips it off and keeps on truckin'
+      # If a PATH_INFO starts with /valid_place, it strips it off and keeps on truckin'
       #
-      on :uri => %r{/valid_place/.*} do
-        set(:uri) { uri[%r{/valid_place(/.*)}, 1] }
+      on :path_info => %r{/valid_place/.*} do
+        set(:path_info) { path_info[%r{/valid_place(/.*)}, 1] }
         pass
       end
       
-      # If a URI starts with /hello_kitty, add a kitty header equal to your query string
+      # If a PATH_INFO starts with /hello_kitty, add a kitty header equal to your query string
       #
-      on :uri => %r{/hello_kitty/.*} do
+      on :path_info => %r{/hello_kitty/.*} do
         act { header['kitty'] = query_string }
         pass
       end
