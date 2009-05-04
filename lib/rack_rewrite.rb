@@ -1,4 +1,5 @@
 $:.unshift(File.dirname(__FILE__))
+require 'rack'
 require 'rack_rewrite/actions'
 
 module Rack
@@ -24,10 +25,19 @@ module Rack
           host_ok = conditions.key?(:host) ? conditions[:host] === env['HTTP_HOST'] : true
           port_ok = conditions.key?(:port) ? conditions[:port] === env['SERVER_PORT'].to_i : true
           scheme_ok = conditions.key?(:scheme) ? conditions[:scheme] === env['rack.url_scheme'] : true
-          
+          if conditions.key?(:params)
+            req = Rack::Request.new(env)
+            params_ok = true
+            conditions[:params].each do |key, test|
+              params_ok = test === req.params[key.to_s]
+              break unless params_ok
+            end
+          else
+            params_ok = true
+          end
           #puts "uri_ok: #{uri_ok} method_ok #{method_ok} host_ok #{host_ok} port_ok #{port_ok} scheme_ok #{scheme_ok} for conditions #{conditions.inspect}"
           
-          uri_ok && method_ok && host_ok && port_ok && scheme_ok
+          uri_ok && method_ok && host_ok && port_ok && scheme_ok && params_ok
         else
           true
         end
