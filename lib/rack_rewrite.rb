@@ -4,7 +4,7 @@ require 'rack_rewrite/actions'
 module Rack
   class Rewrite
     
-    attr_accessor :path, :redirect
+    attr_accessor :path, :redirect, :headers
     
     class ConditionSet
       
@@ -15,7 +15,7 @@ module Rack
         @conditions = conditions
         @actions = []
       end
-      
+
       def satisfied?(env)
         if conditions
           
@@ -58,7 +58,7 @@ module Rack
     end
 
     def act(&block)
-      @current_condition_set.actions << Action::Do.new(block)
+      @current_condition_set.actions << Action::Do.new(self, block)
     end
 
     def pass
@@ -74,6 +74,7 @@ module Rack
     end
     
     def call(env)
+      @headers = {}
       catch(:pass) {
         env = call_conditions(env, @root)
         raise
@@ -83,7 +84,8 @@ module Rack
         @redirect = nil
         redirect
       else
-        @app.call(env)
+        (status, headers, body) = @app.call(env)
+        [status, headers.merge(@headers), body]
       end
     end
     

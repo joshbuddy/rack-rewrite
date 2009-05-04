@@ -28,6 +28,13 @@ Rack middleware for request rewriting.
         pass
       end
       
+      # If a URI starts with /hello_kitty, add a kitty header equal to your query string
+      #
+      on :uri => %r{/hello_kitty/.*} do
+        act { header['kitty'] = query_string }
+        pass
+      end
+      
       fail
     end
     

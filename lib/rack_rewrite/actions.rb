@@ -94,8 +94,13 @@ module Rack
       end
 
       class Do < Action
-        def initialize(action)
+        def initialize(caller, action)
+          @caller = caller
           @action = action
+        end
+
+        def method_missing(method, *args, &block)
+          @caller.send(method, *args, &block)
         end
 
         def call(env)
