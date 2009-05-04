@@ -19,11 +19,13 @@ module Rack
       def satisfied?(env)
         if conditions
           
-          uri_ok = conditions.key?(:uri) ? conditions[:uri] === env['REQUEST_URI'] : true
+          uri_ok = conditions.key?(:uri) ? conditions[:uri] === env['PATH_INFO'] : true
           method_ok = conditions.key?(:method) ? conditions[:method] === env['REQUEST_METHOD'].downcase : true
           host_ok = conditions.key?(:host) ? conditions[:host] === env['HTTP_HOST'] : true
           port_ok = conditions.key?(:port) ? conditions[:port] === env['SERVER_PORT'].to_i : true
           scheme_ok = conditions.key?(:scheme) ? conditions[:scheme] === env['rack.url_scheme'] : true
+          
+          #puts "uri_ok: #{uri_ok} method_ok #{method_ok} host_ok #{host_ok} port_ok #{port_ok} scheme_ok #{scheme_ok} for conditions #{conditions.inspect}"
           
           uri_ok && method_ok && host_ok && port_ok && scheme_ok
         else
@@ -77,7 +79,9 @@ module Rack
         raise
       }
       if @redirect
-        @redirect
+        redirect = @redirect
+        @redirect = nil
+        redirect
       else
         @app.call(env)
       end

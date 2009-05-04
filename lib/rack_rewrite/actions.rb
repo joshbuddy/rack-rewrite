@@ -3,11 +3,11 @@ module Rack
     class Action
       
       def uri
-        @env['REQUEST_PATH']
+        @env['PATH_INFO']
       end
       
       def uri=(uri)
-        @env['REQUEST_PATH'] = uri
+        @env['PATH_INFO'] = uri
         update_uri_qs
       end
       
@@ -21,7 +21,7 @@ module Rack
       end
       
       def update_uri_qs
-        @env['PATH_INFO'] = uri
+        @env['REQUEST_PATH'] = uri
         @env['REQUEST_URI'] = query_string.empty? ? uri : (uri + '?' + query_string)
       end
       
@@ -61,19 +61,19 @@ module Rack
         @env = env
       end
 
-      class Pass < self
+      class Pass < Action
         def call(env)
           throw :pass
         end
       end
 
-      class Fail < self
+      class Fail < Action
         def call(env)
           raise
         end
       end
 
-      class Set < self
+      class Set < Action
 
         def initialize(variable, action)
           @variable = variable
@@ -93,7 +93,7 @@ module Rack
 
       end
 
-      class Do < self
+      class Do < Action
         def initialize(action)
           @action = action
         end
@@ -111,7 +111,7 @@ module Rack
 
       end
 
-      class Redirect < self
+      class Redirect < Action
         def initialize(caller, action)
           @caller = caller
           @action = action
