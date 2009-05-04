@@ -1,0 +1,27 @@
+= rack-rewrite
+
+Rack middleware for request rewriting.
+
+== Example
+
+  use Rack::Rewrite do
+    
+    on :method => 'get' do
+      
+      on :uri => %r{/(api|test)} do
+        act { puts "hey way to go!" }
+        pass
+      end
+  
+      on :uri => %r{/google.*} do
+        redirect { "http://google.com/search?q=#{CGI.escape(query_string)}" }
+      end
+  
+      on :uri => %r{/valid_place.*} do
+        pass
+      end
+      
+      fail
+    end
+    
+  end
