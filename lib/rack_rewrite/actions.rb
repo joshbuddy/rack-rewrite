@@ -25,6 +25,12 @@ module Rack
         @request = Rack::Request.new(env)
       end
       
+      def scheme=(scheme)
+        env = @request.env
+        env['rack.url_scheme'] = scheme  
+        @request = Rack::Request.new(env)
+      end
+      
       def method_missing(method, *args, &block)
         @request.send(method, *args, &block)
       end

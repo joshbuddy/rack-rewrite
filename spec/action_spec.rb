@@ -13,6 +13,17 @@ describe "Rack::Rewrite Rewriting" do
     Rack::Rewrite.new(app) { on(:path_info => '/test') { set(:path_info) { "/test#{path_info}" }; pass } }.call(env)
   end
 
+  it "should rewrite a scheme" do
+    env = Rack::MockRequest.env_for('/test', :method => 'get')
+    app = mock('app')
+    app.should_receive(:call) { |resp|
+      resp['rack.url_scheme'].should == 'https'
+      [200, {}, ["body"]]
+    }
+    
+    Rack::Rewrite.new(app) { on(:path_info => '/test') { set(:scheme) { "https" }; pass } }.call(env)
+  end
+
   it "should arbitrarily add a new header" do
     env = Rack::MockRequest.env_for('/test?Happy-Land', :method => 'get')
     app = mock('app')
