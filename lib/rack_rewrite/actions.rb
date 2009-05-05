@@ -1,5 +1,4 @@
 require 'rack'
-require 'cgi'
 
 module Rack
   class Rewrite
@@ -17,7 +16,7 @@ module Rack
         env = @request.env
         env['QUERY_STRING'] = case params
         when Hash
-          params.inject([]) { |qs, (k, v)| qs << "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}"} * '&'
+          Rack::Utils.build_query(params)
         else
           params
         end
