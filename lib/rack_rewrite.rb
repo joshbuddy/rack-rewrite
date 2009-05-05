@@ -5,6 +5,8 @@ require 'rack_rewrite/actions'
 module Rack
   class Rewrite
     
+    FailError = Class.new(RuntimeError)
+    
     attr_accessor :path, :redirect, :headers
     
     class ConditionSet
@@ -35,16 +37,11 @@ module Rack
           else
             params_ok = true
           end
-          #puts "uri_ok: #{uri_ok} method_ok #{method_ok} host_ok #{host_ok} port_ok #{port_ok} scheme_ok #{scheme_ok} for conditions #{conditions.inspect}"
-          
+
           uri_ok && method_ok && host_ok && port_ok && scheme_ok && params_ok
         else
           true
         end
-      end
-      
-      def inspect
-        "#{id} .. conditions=#{conditions.inspect}\nactions=#{actions.inspect}"
       end
       
     end
@@ -79,15 +76,17 @@ module Rack
       @current_condition_set.actions << Action::Fail.new
     end
     
-    def redirect(pattern = nil, &block)
-      @current_condition_set.actions << Action::Redirect.new(self, pattern || block)
+    def redirect(*args, &block)
+      options = args.last.is_a?(Hash) ? args.pop : {}
+      pattern = args.first
+      @current_condition_set.actions << Action::Redirect.new(self, pattern || block, options[:status] || 302)
     end
     
     def call(env)
       @headers = {}
       catch(:pass) {
         env = call_conditions(env, @root)
-        raise
+        raise FailError.new
       }
       if @redirect
         redirect = @redirect

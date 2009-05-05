@@ -29,7 +29,6 @@ describe "Rack::Rewrite Rewriting" do
       [200, {}, ["body"]]
     }
     response = Rack::Rewrite.new(app) { on(:path_info => '/test') { set(:query_string) { params.merge(:more => :query_goodness)}; pass } }.call(env)
-    
   end
   
   it "should let you create a new querystring from a string" do
@@ -41,6 +40,30 @@ describe "Rack::Rewrite Rewriting" do
     }
     response = Rack::Rewrite.new(app) { on(:path_info => '/test') { set(:query_string) { "this_is_my_query_string" }; pass } }.call(env)
     
+  end
+  
+  it "should fail" do
+    env = Rack::MockRequest.env_for('/test', :method => 'get')
+    app = mock('app')
+    proc { Rack::Rewrite.new(app) { on(:path_info => '/test') { fail }; pass }.call(env) }.should raise_error Rack::Rewrite::FailError
+  end
+  
+  it "should redirect from a proc" do
+    env = Rack::MockRequest.env_for('/test', :method => 'get')
+    app = mock('app')
+    Rack::Rewrite.new(app) { on(:path_info => '/test') { redirect {"/another/place"} }; fail }.call(env).should == [302, {'Location' => '/another/place'}, []]
+  end
+  
+  it "should redirect from a proc (with a special status)" do
+    env = Rack::MockRequest.env_for('/test', :method => 'get')
+    app = mock('app')
+    Rack::Rewrite.new(app) { on(:path_info => '/test') { redirect(:status => 304) {"/another/place"} }; fail }.call(env).should == [304, {'Location' => '/another/place'}, []]
+  end
+  
+  it "should redirect from a string" do
+    env = Rack::MockRequest.env_for('/test', :method => 'get')
+    app = mock('app')
+    Rack::Rewrite.new(app) { on(:path_info => '/test') { redirect "/another/place" }; fail }.call(env).should == [302, {'Location' => '/another/place'}, []]
   end
   
 end

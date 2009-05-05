@@ -27,6 +27,4 @@ describe "Rack::Rewrite Conditions" do
     proc { Rack::Rewrite.new(app) { on(:params => {:test => 'helpme2'}) { pass } }.call(env) }.should raise_error
   end
   
-  
-
 end

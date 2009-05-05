@@ -1,5 +1,6 @@
 require 'rack'
-require 'CGI'
+require 'cgi'
+
 module Rack
   class Rewrite
     class Action
@@ -36,7 +37,7 @@ module Rack
 
       class Fail < Action
         def call(env)
-          raise
+          raise Rack::Rewrite::FailError.new
         end
       end
 
@@ -49,12 +50,7 @@ module Rack
 
         def call(env)
           setup(env)
-          self.send :"#{@variable}=", case @action
-          when Proc
-            instance_eval(&@action)
-          else
-            instance_eval(@action)
-          end
+          self.send(:"#{@variable}=", instance_eval(&@action))
           env
         end
 
@@ -76,30 +72,26 @@ module Rack
         
         def call(env)
           setup(env)
-          case @action
-          when Proc
-            instance_eval(&@action)
-          else
-            instance_eval(@action)
-          end
+          instance_eval(&@action)
           env
         end
 
       end
 
       class Redirect < Action
-        def initialize(caller, action)
+        def initialize(caller, action, status)
           @caller = caller
           @action = action
+          @status = status
         end
 
         def call(env)
           setup(env)
-          @caller.redirect = [ 302, {'Location'=> case @action
+          @caller.redirect = [ @status, {'Location'=> case @action
           when Proc
             instance_eval(&@action)
           else
-            instance_eval(@action)
+            @action
           end}, []]
           throw :pass
         end
