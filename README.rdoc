@@ -35,6 +35,13 @@ Rack middleware for request rewriting.
         pass
       end
       
+      # If the request has a has a param of kitten=cute or kitten=happy, lets log it and pass it on!
+      #
+      on :params => {:kitten => /cute|happy/}  do
+        act { log('what a nice cat') }
+        pass
+      end
+      
       fail
     end
     
