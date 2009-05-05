@@ -1,5 +1,5 @@
 require 'rack'
-
+require 'CGI'
 module Rack
   class Rewrite
     class Action
@@ -10,6 +10,18 @@ module Rack
       
       def respond_to?(method)
         @request.respond_to?(method) || super
+      end
+      
+      def query_string=(params)
+        env = @request.env
+        env['QUERY_STRING'] = case params
+        when Hash
+          params.inject([]) { |qs, (k, v)| qs << "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}"} * '&'
+        else
+          params
+        end
+        
+        @request = Rack::Request.new(env)
       end
       
       def method_missing(method, *args, &block)
