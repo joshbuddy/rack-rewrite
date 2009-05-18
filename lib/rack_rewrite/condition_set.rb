@@ -13,7 +13,7 @@ module Rack
       def satisfied?(env)
         if conditions
       
-          uri_ok = conditions.key?(:uri) ? conditions[:uri] === env['PATH_INFO'] : true
+          uri_ok = conditions.key?(:path_info) ? conditions[:path_info] === env['PATH_INFO'] : true
           method_ok = conditions.key?(:method) ? conditions[:method] === env['REQUEST_METHOD'].downcase : true
           host_ok = conditions.key?(:host) ? conditions[:host] === env['HTTP_HOST'] : true
           port_ok = conditions.key?(:port) ? conditions[:port] === env['SERVER_PORT'].to_i : true
