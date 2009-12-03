@@ -5,12 +5,13 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "rack-rewrite"
-    gem.summary = %Q{TODO}
+    gem.summary = gem.description = "Rack middleware for request rewriting"
     gem.email = "joshbuddy@gmail.com"
     gem.homepage = "http://github.com/joshbuddy/rack-rewrite"
     gem.authors = ["Joshua Hull"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
+  Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
